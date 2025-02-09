@@ -10,9 +10,9 @@ const Locations = (props) => {
     //Rendering list of elements for the sidebar list
     const cityElements = locations.map(({city, id}) => (
         <li key={id}
-            className="font-medium text-lg  mb-5"
+            className="text-lg  mb-5"
         >
-           <p className="text-2xl ml-8">{city}</p>
+           <p className="text-2xl ml-8 font-normal">{city}</p>
         </li>
     ))
 
@@ -137,7 +137,7 @@ const Locations = (props) => {
                             </div>
                             
                             {forecast &&
-                            <div className="p-5 bg-gray-950 mx-4 rounded-2xl flex justify-between">
+                            <div className="p-5 bg-gray-950 rounded-2xl flex justify-between">
                                 <div className="flex flex-col">
                                     <p className="flex items-center gap-2 mb-1">
                                         <MapPin size={15}/>
@@ -151,8 +151,8 @@ const Locations = (props) => {
                                 <div className="flex items-center gap-3">
                                     <div><Moon/></div>
                                     <div>
-                                        <p className="font-bold text-lg">{forecast?.current.temp_c}</p>
-                                        <p className="text-xs text-white/50">Feels like {forecast?.current.feelslike_c}</p>
+                                        <p className="font-bold text-lg">{forecast.current.temp_c}</p>
+                                        <p className="text-xs text-white/50">Feels like {forecast.current.feelslike_c}</p>
                                     </div>
                                 </div>
                             </div>}

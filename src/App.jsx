@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Menu, X, MapPin, Radiation } from 'lucide-react'
 import SideBar from './components/SideBar'
+import HourlyForcast from './components/HourlyForcast.jsx';
 import { nanoid } from 'nanoid'
 import { getWeatherAlerts, getForecast } from '../weather'
 import dayIcon from './assets/sun.png'
@@ -151,7 +152,6 @@ const App = () => {
   }, [favLocation])
 
   console.log(forecast)
-  console.log(weatherAlerts)
   return (
     <main>
       <div className="relative h-screen overflow-hidden max-w-5xl mx-auto">
@@ -172,8 +172,8 @@ const App = () => {
             </p>}
 
             {forecast && (
-              <div id="weather-info" className="flex flex-col items-center text-white w-full py-10 px-5 sm:px-10 mt-10">
-                <div id="temp" className="w-11/12">
+              <div id="weather-info" className="flex flex-col items-center text-white w-full py-10 px-5 sm:px-10">
+                <div id="temp" className="w-11/12 sm:px-16">
                   <div className="flex justify-between items-center w-full">
                     <div className="flex flex-col items-end">
                       <p className="text-5xl self-start mb-5">
@@ -191,17 +191,29 @@ const App = () => {
                   </div>
                   <div className="mt-5 text-left text-sm font-normal leading-6">
                     <p>
-                      {forecast.forecast.forecastday[0].day.maxtemp_c} / {forecast.forecast.forecastday[0].day.mintemp_c} Feels like {forecast.current.feelslike_c}&deg;
+                      {forecast.forecast.forecastday[0].day.maxtemp_c} / {forecast.forecast.forecastday[0].day.mintemp_c}  Feels like {forecast.current.feelslike_c}&deg;
                     </p>
                     <p>
                       {forecast.location.localtime}
                     </p>
                   </div>
                 </div>
-                <div id="sunrise-sunset" className="flex justify-evenly items-center bg-white/10 backdrop-blur-md rounded-lg p-5 mt-5 shadow-lg border border-white/20 w-11/12 text-center">
-
+                <HourlyForcast
+                    forecast={forecast}
+                />
+                <div id="sunrise-sunset" className="flex justify-evenly items-center bg-white/10 backdrop-blur-md rounded-lg p-5 mt-2 shadow-lg border border-white/20 w-11/12 text-center">
+                  <div id="sunrise" className="w-1/2 flex flex-col items-center">
+                    <h3>Sunrise</h3>
+                    <p>{forecast.forecast.forecastday[0].astro.sunrise}</p>
+                    <img src={sunriseIcon} alt="sunrise icon"  className="w-20 mt-2"/>
+                  </div>
+                  <div id="sunset" className="w-1/2 flex flex-col items-center">
+                    <h3>Sunset</h3>
+                    <p>{forecast.forecast.forecastday[0].astro.sunset}</p>
+                    <img src={sunsetIcon} alt="sunset icon" className="w-20 mt-2"/>
+                  </div>
                 </div>
-                <div id="weather-conditions" className="flex justify-evenly items-center bg-white/10 backdrop-blur-md rounded-lg p-5 mt-5 shadow-lg border border-white/20 w-11/12 text-center">
+                <div id="weather-conditions" className="flex justify-evenly items-center bg-white/10 backdrop-blur-md rounded-lg p-5 mt-2 shadow-lg border border-white/20 w-11/12 text-center">
                   <div id="uv-index" className="flex flex-col items-center justify-evenly gap-1 w-1/3">
                     <img src={uvIcon} alt="uv index icon"  className="w-10 mb-1"/>
                     <h3 className="text-center font-semibold">UV index</h3>
@@ -218,7 +230,7 @@ const App = () => {
                     <p className="text-gray-200/85">{forecast.current.wind_kph} km/h</p>
                   </div>
                 </div>
-                <div id="aqi" className="flex justify-between items-center bg-white/10 backdrop-blur-md rounded-lg p-5 mt-2 shadow-lg border border-white/20 w-11/12 text-center" >
+                <div id="aqi" className="flex justify-between items-center bg-white/10 backdrop-blur-md rounded-lg p-5 mt-2 shadow-lg border border-white/20 w-11/12 text-center sm:px-16" >
                   <p className="flex gap-2"><Radiation/>AQI</p>
                   <p className="text-nowrap">{aqi}</p>
                 </div>
