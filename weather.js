@@ -5,18 +5,20 @@ const BASE_URL = import.meta.env.VITE_WEATHER_API_URL
 
 const today = new Date().toISOString().split("T")[0]
 
-export const getWeather = async (city) => {
+export const getForecast = async (city) => {
     try {
-        const response = await axios.get(`${BASE_URL}/current.json`, {
+        const response = await axios.get(`${BASE_URL}/forecast.json`, {
             params: {
                 key: API_KEY,
                 q: city,
-                aqi: "yes"
-            },
+                aqi: "yes",
+                days: 7,
+                dt: today
+            }
         })
         return response.data
     } catch (error) {
-        console.error("Error fetching weather:", error)
+        console.error("Error fetching weather alerts:", error)
         return null
     }
 }
@@ -36,19 +38,3 @@ export const getWeatherAlerts = async (city) => {
     }
 }
 
-export const getForecast = async (city) => {
-    try {
-        const response = await axios.get(`${BASE_URL}/forecast.json`, {
-            params: {
-                key: API_KEY,
-                q: city,
-                days: 7,
-                dt: today
-            }
-        })
-        return response.data
-    } catch (error) {
-        console.error("Error fetching weather alerts:", error)
-        return null
-    }
-}

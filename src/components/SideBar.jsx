@@ -4,7 +4,7 @@ import { Star, Info, MapPin, MapPinPlusInside, ChevronLeft, Moon, Trash2 } from 
 import Information from './Information'
 
 const Locations = (props) => {
-    const {locations, formSubmit, manageLocsModal, openManageLocationsModal, closeManageLocationsModal, favLocation, toggleFavorite, weather, timeOfDay, handleDelete, openInfoModal, closeInfoModal, infoModal} = props
+    const {locations, formSubmit, manageLocsModal, openManageLocationsModal, closeManageLocationsModal, favLocation, toggleFavorite, forecast, timeOfDay, handleDelete, openInfoModal, closeInfoModal, infoModal} = props
 
 
     //Rendering list of elements for the sidebar list
@@ -24,8 +24,8 @@ const Locations = (props) => {
                     <MapPin size={15}/> {city}
                 </p>
                 <div className="flex flex-col text-xs text-white/50 text-left">
-                    <p>{weather?.location.tz_id}</p>
-                    <p>{weather?.location.localtime}</p>
+                    <p>{forecast?.location.tz_id}</p>
+                    <p>{forecast?.location.localtime}</p>
                 </div>
             </div>
             <div className="flex gap-2">
@@ -41,8 +41,8 @@ const Locations = (props) => {
             <div className="flex items-center gap-3">
                 <div><Moon/></div>
                 <div>
-                    <p className="font-bold text-lg">{weather?.current.temp_c}</p>
-                    <p className="text-xs text-white/50 ">Feels like {weather?.current.feelslike_c}</p>
+                    <p className="font-bold text-lg">{forecast?.current.temp_c}</p>
+                    <p className="text-xs text-white/50 ">Feels like {forecast?.current.feelslike_c}</p>
                 </div>
             </div>
         </div>
@@ -78,7 +78,7 @@ const Locations = (props) => {
                                 closeInfoModal={closeInfoModal}/>
                 }
                 </div>
-                {weather &&
+                {forecast &&
                 <div id="favorite-location-container"
                      className="flex justify-between"
                 >
@@ -89,7 +89,7 @@ const Locations = (props) => {
                         <img src={timeOfDay} 
                              className="w-6"
                         />
-                        {weather?.current.temp_c}&deg;
+                        {forecast?.current.temp_c}&deg;
                     </p>
                 </div>}
             </div>
@@ -136,7 +136,7 @@ const Locations = (props) => {
                                 }
                             </div>
                             
-                            {weather &&
+                            {forecast &&
                             <div className="p-5 bg-gray-950 mx-4 rounded-2xl flex justify-between">
                                 <div className="flex flex-col">
                                     <p className="flex items-center gap-2 mb-1">
@@ -144,15 +144,15 @@ const Locations = (props) => {
                                         {favLocation}
                                     </p>
                                     <div className="flex flex-col text-xs text-white/50 text-left">
-                                        <p>{weather?.location.tz_id}</p>
-                                        <p>{weather?.location.localtime}</p>
+                                        <p>{forecast?.location.tz_id}</p>
+                                        <p>{forecast?.location.localtime}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <div><Moon/></div>
                                     <div>
-                                        <p className="font-bold text-lg">{weather?.current.temp_c}</p>
-                                        <p className="text-xs text-white/50">Feels like {weather?.current.feelslike_c}</p>
+                                        <p className="font-bold text-lg">{forecast?.current.temp_c}</p>
+                                        <p className="text-xs text-white/50">Feels like {forecast?.current.feelslike_c}</p>
                                     </div>
                                 </div>
                             </div>}
