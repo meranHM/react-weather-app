@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { getWeatherAlerts, getForecast } from '../weather'
 import { motion } from 'framer-motion'
-import { Menu, X, MapPin, Radiation } from 'lucide-react'
+import { Menu, X, MapPin, Radiation, Trash2, Star, Moon } from 'lucide-react'
 import { nanoid } from 'nanoid'
 import { useMediaQuery } from 'react-responsive'
 import SideBar from './components/SideBar'
@@ -34,10 +34,12 @@ const App = () => {
 
   //Derived Values
   const roundedTemp = Math.floor(forecast?.current.temp_c)
+  const roundedFeelTemp = Math.floor(forecast?.current.feelslike_c)
   const roundedMaxTemp = Math.floor(forecast?.forecast.forecastday[0].day.maxtemp_c)
   const roundedMinTemp = Math.floor(forecast?.forecast.forecastday[0].day.mintemp_c)
-  const roundedFeelTemp = Math.floor(forecast?.current.feelslike_c)
   const smallScreen = useMediaQuery({ maxWidth: 640 })
+  
+
 
   //Choosing an icon based on local time
   let timeOfDay;
@@ -166,8 +168,6 @@ const App = () => {
     }
   }, [favLocation])
 
-  console.log(locations)
-  console.log(favLocation)
   return (
     <main className="min-h-screen">
       <div className="relative min-h-screen max-w-3xl mx-auto overflow-hidden">
@@ -270,19 +270,29 @@ const App = () => {
             <SideBar 
                 formSubmit={formSubmit}
                 locations={locations}
-                manageLocsModal={manageLocsModal}
                 openManageLocationsModal={openManageLocationsModal}
-                closeManageLocationsModal={closeManageLocationsModal}
                 favLocation={favLocation}
-                toggleFavorite={toggleFavorite}
                 forecast={forecast}
                 timeOfDay={timeOfDay}
-                handleDelete={handleDelete}
                 infoModal={infoModal}
                 openInfoModal={openInfoModal}
                 closeInfoModal={closeInfoModal}
+                roundedTemp={roundedTemp}
+                roundedFeelTemp={roundedFeelTemp}
             />
         </motion.div>
+        {manageLocsModal && 
+          <ManageLocations
+            closeManageLocationsModal={closeManageLocationsModal}
+            infoModal={infoModal}
+            openInfoModal={openInfoModal}
+            closeInfoModal={closeInfoModal}
+            forecast={forecast}
+            favLocation={favLocation}
+            locations={locations}
+            roundedTemp={roundedTemp}
+            roundedFeelTemp={roundedFeelTemp}
+          />}
       </div>
     </main>
   )

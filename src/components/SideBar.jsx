@@ -1,13 +1,9 @@
 
-import { motion } from 'framer-motion'
 import { Star, Info, MapPin, MapPinPlusInside, ChevronLeft, Moon, Trash2 } from 'lucide-react'
 import Information from './Information'
 
 const Locations = (props) => {
-    const {locations, formSubmit, manageLocsModal, openManageLocationsModal, closeManageLocationsModal, favLocation, toggleFavorite, forecast, timeOfDay, handleDelete, openInfoModal, closeInfoModal, infoModal} = props
-
-    const roundedTemp = Math.floor(forecast?.current.temp_c)
-    const roundedFeelTemp = Math.floor(forecast?.current.feelslike_c)
+    const {locations, formSubmit, openManageLocationsModal, favLocation, forecast, timeOfDay, openInfoModal, closeInfoModal, infoModal, roundedTemp } = props
 
     //Rendering list of elements for the sidebar list
     const cityElements = locations.map(({city, id}) => (
@@ -16,38 +12,6 @@ const Locations = (props) => {
         >
            {city}
         </li>
-    ))
-
-    //Rendering "Manage Locations" Modal Elements seperately
-    const modalElements = locations.map(({city, id}) => (
-        <div key={id} className="p-5 bg-gray-300 w-11/12 mx-4 rounded-2xl flex justify-between items-center group">
-            <div className="flex flex-col">
-                <p className="flex items-center gap-2 mb-1">
-                    <MapPin size={15}/> {city}
-                </p>
-                <div className="flex flex-col text-xs text-white/50 text-left">
-                    <p>{forecast?.location.tz_id}</p>
-                    <p>{forecast?.location.localtime}</p>
-                </div>
-            </div>
-            <div className="flex gap-2">
-                <button className="hidden group-hover:block group-focus-within:block"
-                        onClick={() =>toggleFavorite(id)}
-                >
-                    <Star className={favLocation === city ? "text-yellow-400" : "text-white"}/>
-                </button>
-                <button onClick={() => handleDelete(id)}>
-                    <Trash2 size={20}/>
-                </button>
-            </div>
-            <div className="flex items-center gap-3">
-                <div><Moon/></div>
-                <div>
-                    <p className="font-bold text-lg">{roundedTemp}</p>
-                    <p className="text-xs text-white/50 ">Feels like {roundedFeelTemp}</p>
-                </div>
-            </div>
-        </div>
     ))
 
   return (

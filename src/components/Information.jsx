@@ -4,14 +4,14 @@ import { ChevronLeft} from 'lucide-react'
 const Information = ({closeInfoModal}) => {
   return (
     <div id="modal-overlay"
-         className="fixed top-0 left-0 w-screen h-screen bg-black/50 flex justify-center items-center z-50"
+         className="absolute top-0 left-0 w-screen h-screen bg-black/50 flex justify-center items-center z-50"
     >
       <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
           transition={{ duration: 0.3 }} 
-          className="flex flex-col fixed top-0 left-0 w-screen h-screen bg-black z-50"
+          className="flex flex-col absolute top-0 left-0 w-screen h-screen bg-black z-50"
       >
         <div id="modal-header" className="flex items-center text-2xl p-2 gap-5 mt-5">
             <button onClick={closeInfoModal}>
