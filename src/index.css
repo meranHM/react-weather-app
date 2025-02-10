@@ -5,8 +5,12 @@
 
 body {
     width: 100dvw;
-    height: 100dvh;
+    min-height: 100dvh;
     overflow-x: hidden;
     font-family: "Roboto", sans-serif;
     background: linear-gradient(to bottom, #3B82F6, #1E40AF);
+}
+
+#root {
+    height: 100%;
 }

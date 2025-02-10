@@ -17,6 +17,7 @@
     "nanoid": "^5.0.9",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-responsive": "^10.0.0",
     "tailwind-scrollbar": "^3.0.0",
     "tailwind-scrollbar-hide": "^2.0.0"
   },

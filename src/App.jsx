@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
+import { getWeatherAlerts, getForecast } from '../weather'
 import { motion } from 'framer-motion'
 import { Menu, X, MapPin, Radiation } from 'lucide-react'
-import SideBar from './components/SideBar'
-import HourlyForcast from './components/HourlyForcast.jsx';
 import { nanoid } from 'nanoid'
-import { getWeatherAlerts, getForecast } from '../weather'
+import { useMediaQuery } from 'react-responsive'
+import SideBar from './components/SideBar'
+import HourlyForcast from './components/HourlyForcast.jsx'
+import ManageLocations from './components/ManageLocations.jsx'
 import dayIcon from './assets/sun.png'
 import nightIcon from './assets/crescent-moon.png'
 import uvIcon from './assets/uv-index.png'
@@ -14,6 +16,13 @@ import sunriseIcon from './assets/sunrise.png'
 import sunsetIcon from './assets/sunset.png'
 
 const App = () => {
+  /* 
+    - improve delete and favorite button style
+    - add event listener for esc button
+    - fix when a location is added to favLocation, it is removed in other locs
+    - turn favLocation into object 
+  */
+  
   const [isNavOpen, setIsNavOpen] = useState(false)
   const [locations, setLocations] = useState([])
   const [favLocation, setFavlocation] = useState(null)
@@ -22,6 +31,13 @@ const App = () => {
   const [error, setError] = useState("")
   const [manageLocsModal, setManageLocsModal] = useState(false)
   const [infoModal, setInfoModal] = useState(false)
+
+  //Derived Values
+  const roundedTemp = Math.floor(forecast?.current.temp_c)
+  const roundedMaxTemp = Math.floor(forecast?.forecast.forecastday[0].day.maxtemp_c)
+  const roundedMinTemp = Math.floor(forecast?.forecast.forecastday[0].day.mintemp_c)
+  const roundedFeelTemp = Math.floor(forecast?.current.feelslike_c)
+  const smallScreen = useMediaQuery({ maxWidth: 640 })
 
   //Choosing an icon based on local time
   let timeOfDay;
@@ -99,17 +115,16 @@ const App = () => {
 
     if (cityName.trim() === "") {
       return
-    } 
-
-    setLocations(prevLocs => [...prevLocs, {
-        id: nanoid(),
-        city: cityName.trim()
-      }])
-
-      if (!favLocation) {
-        setFavlocation(cityName.trim())
-      }
-
+    }
+    
+    if (!favLocation) {
+      setFavlocation(cityName.trim())
+    } else {
+      setLocations(prevLocs => [...prevLocs, {
+          id: nanoid(),
+          city: cityName.trim()
+        }])
+    }
       setIsNavOpen(false)
   }
   
@@ -151,14 +166,15 @@ const App = () => {
     }
   }, [favLocation])
 
-  console.log(forecast)
+  console.log(locations)
+  console.log(favLocation)
   return (
-    <main>
-      <div className="relative h-screen overflow-hidden max-w-5xl mx-auto">
+    <main className="min-h-screen">
+      <div className="relative min-h-screen max-w-3xl mx-auto overflow-hidden">
         <motion.div
-            animate={{x: isNavOpen ? "24rem" : "0rem"}}
+            animate={{x: isNavOpen ? (smallScreen ? "18rem" : "24rem") : "0rem"}}
             transition={{type: "spring", stiffness: 80}}
-            className="flex-1 p-1"
+            className="p-1"
           >
             <button className="absolute top-4 left-2 sm:left-4 bg-white/10 backdrop-blur-md text-white rounded-lg p-1"
                     onClick={toggleMenu}
@@ -172,28 +188,28 @@ const App = () => {
             </p>}
 
             {forecast && (
-              <div id="weather-info" className="flex flex-col items-center text-white w-full py-10 px-5 sm:px-10">
-                <div id="temp" className="w-11/12 sm:px-16">
+              <div id="weather-info" className="flex flex-col items-center text-white w-full py-14 sm:py-10 px-5 sm:px-10">
+                <div id="temp" className="w-11/12 sm:px-10">
                   <div className="flex justify-between items-center w-full">
                     <div className="flex flex-col items-end">
                       <p className="text-5xl self-start mb-5">
-                        {forecast.current.temp_c}&deg;
+                        {roundedTemp}&deg;
                       </p>
-                      <p className="flex items-center text-4xl gap-3">  
+                      <p className="flex items-center text-2xl sm:text-4xl gap-3 text-nowrap">  
                         {forecast.location.name} <MapPin size={30} />
                       </p>
                     </div>
                     <img 
                       src={timeOfDay} 
                       alt={(hour >= 6 && hour < 19) ? "Sun Icon" : "Moon Icon"}
-                      className="w-28" 
+                      className="w-20 sm:w-28" 
                     />
                   </div>
                   <div className="mt-5 text-left text-sm font-normal leading-6">
-                    <p>
-                      {forecast.forecast.forecastday[0].day.maxtemp_c} / {forecast.forecast.forecastday[0].day.mintemp_c}  Feels like {forecast.current.feelslike_c}&deg;
+                    <p className="tracking-wider">
+                      {roundedMaxTemp}&deg; / {roundedMinTemp}&deg; Feels like {roundedFeelTemp}&deg;
                     </p>
-                    <p>
+                    <p className="tracking-wider">
                       {forecast.location.localtime}
                     </p>
                   </div>
@@ -249,7 +265,7 @@ const App = () => {
             initial={{x: "-100%"}}
             animate={{x: isNavOpen ? "0%" : "-100%"}}
             transition={{type: "spring", stiffness: 80}}
-            className="absolute top-0 left-0 bg-white/10 backdrop-blur-md rounded-lg p-4 shadow-lg border border-white/20 h-screen sm:w-96 w-96 text-center" 
+            className="absolute top-0 left-0 bg-white/10 backdrop-blur-md rounded-lg p-4 shadow-lg border border-white/20 min-h-screen sm:w-96 w-72 text-center" 
           >
             <SideBar 
                 formSubmit={formSubmit}

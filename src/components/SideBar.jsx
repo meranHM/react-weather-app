@@ -6,19 +6,21 @@ import Information from './Information'
 const Locations = (props) => {
     const {locations, formSubmit, manageLocsModal, openManageLocationsModal, closeManageLocationsModal, favLocation, toggleFavorite, forecast, timeOfDay, handleDelete, openInfoModal, closeInfoModal, infoModal} = props
 
+    const roundedTemp = Math.floor(forecast?.current.temp_c)
+    const roundedFeelTemp = Math.floor(forecast?.current.feelslike_c)
 
     //Rendering list of elements for the sidebar list
     const cityElements = locations.map(({city, id}) => (
         <li key={id}
-            className="text-lg  mb-5"
+            className="text-2xl ml-8 font-normal mb-5 text-left"
         >
-           <p className="text-2xl ml-8 font-normal">{city}</p>
+           {city}
         </li>
     ))
 
     //Rendering "Manage Locations" Modal Elements seperately
     const modalElements = locations.map(({city, id}) => (
-        <div key={id} className="p-5 bg-gray-950 mx-4 rounded-2xl flex justify-between items-center group">
+        <div key={id} className="p-5 bg-gray-300 w-11/12 mx-4 rounded-2xl flex justify-between items-center group">
             <div className="flex flex-col">
                 <p className="flex items-center gap-2 mb-1">
                     <MapPin size={15}/> {city}
@@ -41,33 +43,32 @@ const Locations = (props) => {
             <div className="flex items-center gap-3">
                 <div><Moon/></div>
                 <div>
-                    <p className="font-bold text-lg">{forecast?.current.temp_c}</p>
-                    <p className="text-xs text-white/50 ">Feels like {forecast?.current.feelslike_c}</p>
+                    <p className="font-bold text-lg">{roundedTemp}</p>
+                    <p className="text-xs text-white/50 ">Feels like {roundedFeelTemp}</p>
                 </div>
             </div>
         </div>
     ))
 
   return (
-    <div id="side-menu-container" className="flex flex-col  p-4 text-white">
+    <div id="side-menu-container" className="flex flex-col min-h-screen p-4 text-white items-center">
         {/* Adding the city form container */}
-        <div className="flex flex-col mt-5 text-left px-2 py-4 border-b-2 border-dotted">
+        <div className="flex flex-col mt-5 text-left  py-4 border-b-2 border-dotted border-white/50 w-full">
             <form action={formSubmit}
-                  className="flex flex-col"
+                  className="flex flex-col w-full"
             >
-                <label htmlFor="city" className="text-lg font-meidum">
+                <label htmlFor="city" className="text-lg">
                     Add a city:
                 </label>
                 <input id="city" type="text" name="city" placeholder="e.g Tehran" className="p-2 rounded-md mt-1 text-gray-900"/>
             </form>
         </div>
-        
-        <div className="px-1 py-1">
+        <div className="py-1 w-full flex flex-col items-center">
             {/* Favorite location container */}
-            <div className="flex flex-col border-b-2 border-dotted mb-2 py-3 z-50">
+            <div className="flex flex-col border-b-2 border-dotted border-white/50 mt-1 pb-4 w-full">
                 <div className="flex justify-between items-center">
-                <h2 className="flex items-center gap-3 mb-2 text-lg">
-                    <Star/> Favorite Location
+                <h2 className="flex items-center gap-1 mb-2 text-lg">
+                    <Star size={22}/> Favorite Location
                 </h2>
                 <button className="cursor-pointer mb-1"
                         onClick={openInfoModal}
@@ -89,16 +90,16 @@ const Locations = (props) => {
                         <img src={timeOfDay} 
                              className="w-6"
                         />
-                        {forecast?.current.temp_c}&deg;
+                        {roundedTemp}&deg;
                     </p>
                 </div>}
             </div>
-            {/* Other added locations container */}
-            <div className="mt-4 z-50">
-                <h2 className="flex items-center gap-3 mb-2 text-lg">
+            {/* Other locations container */}
+            <div className="mt-4 w-full flex flex-col items-center">
+                <h2 className="flex items-center self-start gap-1 mb-2 text-lg">
                    <MapPinPlusInside size={22}/>  Other Locations
                 </h2>
-                <ul id="added-locations" className="list-none text-left py-3">
+                <ul id="added-locations" className="flex flex-col self-start list-none py-3">
                     {cityElements}
                 </ul>
                 {/* Manage Locations Modal */}
@@ -107,63 +108,7 @@ const Locations = (props) => {
                 >
                     Manage Locations
                 </button>
-                {manageLocsModal && 
-                    <div id="modal-overlay"
-                         className="fixed top-0 left-0 w-screen h-screen bg-black/50 flex justify-center items-center z-50"
-                    >
-                        <motion.div 
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            transition={{ duration: 0.3 }}
-                            className="flex flex-col fixed top-0 left-0 w-screen h-screen bg-black z-[100]"
-                        >
-                            <div id="modal-header" className="flex items-center text-2xl p-2 gap-5 mt-5">
-                                <button onClick={closeManageLocationsModal}>
-                                    <ChevronLeft size={30}/>
-                                </button>
-                                <h2>Manage locations</h2>
-                            </div>
-                            <div className="flex justify-between px-5 mt-2 mb-1">
-                                <h4 className="text-sm text-white/50">Favorite location</h4>
-                                <button className="cursor-pointer mb-1"
-                                        onClick={openInfoModal}
-                                >
-                                        <Info size={18}/>
-                                </button>
-                                {infoModal && <Information 
-                                                closeInfoModal={closeInfoModal}/>
-                                }
-                            </div>
-                            
-                            {forecast &&
-                            <div className="p-5 bg-gray-950 rounded-2xl flex justify-between">
-                                <div className="flex flex-col">
-                                    <p className="flex items-center gap-2 mb-1">
-                                        <MapPin size={15}/>
-                                        {favLocation}
-                                    </p>
-                                    <div className="flex flex-col text-xs text-white/50 text-left">
-                                        <p>{forecast?.location.tz_id}</p>
-                                        <p>{forecast?.location.localtime}</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <div><Moon/></div>
-                                    <div>
-                                        <p className="font-bold text-lg">{forecast.current.temp_c}</p>
-                                        <p className="text-xs text-white/50">Feels like {forecast.current.feelslike_c}</p>
-                                    </div>
-                                </div>
-                            </div>}
-
-                            <h4 className="text-sm text-white/50 text-left ml-5 mt-5">
-                                Other locations
-                            </h4>
-                            {modalElements}
-                        </motion.div>
-                    </div>} 
-                </div>
+            </div>
         </div>
     </div>
   )
