@@ -1,7 +1,7 @@
 # Weather App
 
 A modern, feature-rich weather application built with React, TailwindCSS, and Framer Motion.
-
+I was always a fan of Samsung's Weather UI, so that inspired me to create this practice project.
 ## Features
 
 - **Multiple Locations:** Users can add multiple cities and set one as their favorite.
