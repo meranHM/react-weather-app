@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { getWeatherAlerts, getForecast } from '../weather'
 import { motion } from 'framer-motion'
-import { Menu, X, MapPin, Radiation, Trash2, Star, Moon } from 'lucide-react'
+import { Menu, X, MapPin, Radiation } from 'lucide-react'
 import { nanoid } from 'nanoid'
 import { useMediaQuery } from 'react-responsive'
 import SideBar from './components/SideBar'
@@ -16,21 +16,18 @@ import sunriseIcon from './assets/sunrise.png'
 import sunsetIcon from './assets/sunset.png'
 
 const App = () => {
-  /* 
-    - improve delete and favorite button style
-    - add event listener for esc button
-    - fix when a location is added to favLocation, it is removed in other locs
-    - turn favLocation into object 
-  */
-  
+
   const [isNavOpen, setIsNavOpen] = useState(false)
   const [locations, setLocations] = useState([])
-  const [favLocation, setFavlocation] = useState(null)
+  const [favLocation, setFavlocation] = useState({id: null, city: ""})
   const [weatherAlerts, setWeatherAlerts] = useState([])
   const [forecast, setForcast] = useState(null)
+  const [otherForecast, setOtherForecast] = useState([])
   const [error, setError] = useState("")
+  const [otherError, setOtherError] = useState("")
   const [manageLocsModal, setManageLocsModal] = useState(false)
   const [infoModal, setInfoModal] = useState(false)
+  const SideBarRef = useRef(null)
 
   //Derived Values
   const roundedTemp = Math.floor(forecast?.current.temp_c)
@@ -38,9 +35,8 @@ const App = () => {
   const roundedMaxTemp = Math.floor(forecast?.forecast.forecastday[0].day.maxtemp_c)
   const roundedMinTemp = Math.floor(forecast?.forecast.forecastday[0].day.mintemp_c)
   const smallScreen = useMediaQuery({ maxWidth: 640 })
-  
-
-
+  const hasFavorite = favLocation.city !== ""
+ 
   //Choosing an icon based on local time
   let timeOfDay;
   const localTime = forecast?.location.localtime
@@ -52,12 +48,22 @@ const App = () => {
     timeOfDay = nightIcon
   }
 
+  //Handling background color based on local time
+  let isDay;
+
+  if (hour >= 6 && hour < 19) {
+    isDay = true
+  } else {
+    isDay = false
+  }
+
+
   //Handling Air Quality based on data fetched from API
   const localAqi = forecast?.current.air_quality["us-epa-index"]
   const aqiLevels = {
     1: "Good",
     2: "Moderate",
-    3: "Unhealthy for sensitive group",
+    3: "Unhealthy for sensitive groups",
     4: "Unhealthy",
     5: "Very Unhealthy",
     6: "Hazardous",
@@ -65,7 +71,7 @@ const App = () => {
   const aqi = aqiLevels[localAqi] || "Unknown"
 
   //Handling UV Index based on data fetched from API
-  const localUv = forecast?.current.uv
+  const localUv = Math.floor(forecast?.current.uv)
   const uvLevels = {
     0: "Low",
     1: "Low",
@@ -81,25 +87,45 @@ const App = () => {
   }
   const uvIndex = localUv >= 11 ? "Extreme" : uvLevels[localUv] || "Unkown"
 
-
   //Handle function for opening and closing sidebar menu
   const toggleMenu = () => {
     setIsNavOpen(!isNavOpen)
   }
 
-  //Fetching weather data and alerts from the API
-  const fetchWeather = async () => {
-    if (!favLocation) {
+  //Handling location form submission with React 19 method
+  function formSubmit(formData) {
+      const cityName = formData.get("city").trim()
+  
+      if (cityName === "") {
+        return
+      }
+      
+      if (!hasFavorite) {
+        setFavlocation({
+          id: nanoid(),
+          city: cityName
+        })
+      } else {
+        setLocations(prevLocs => [...prevLocs, {
+            id: nanoid(),
+            city: cityName
+          }])
+      }
+        setIsNavOpen(false)
+    }
+
+  //Fetching weather data and alerts for favortie location from the API
+  const fetchFavLocWeather = async () => {
+    if (!hasFavorite) {
       return
     }
     setError("")
     setWeatherAlerts([])
     setForcast(null)
     
-    const forecastData = await getForecast(favLocation)
-    const weatherAlertsData = await getWeatherAlerts(favLocation)
+    const forecastData = await getForecast(favLocation.city)
+    const weatherAlertsData = await getWeatherAlerts(favLocation.city)
    
-
     if (forecastData) {
       setForcast(forecastData)
     } else {
@@ -109,34 +135,43 @@ const App = () => {
     if (weatherAlertsData && weatherAlertsData.alerts) {
       setWeatherAlerts(weatherAlertsData)
     }
-}
-
-  //Handling location form submission with React 19 method
-  function formSubmit(formData) {
-    const cityName = formData.get("city")
-
-    if (cityName.trim() === "") {
-      return
-    }
-    
-    if (!favLocation) {
-      setFavlocation(cityName.trim())
-    } else {
-      setLocations(prevLocs => [...prevLocs, {
-          id: nanoid(),
-          city: cityName.trim()
-        }])
-    }
-      setIsNavOpen(false)
   }
-  
+
+  //Fetching weather data for other locations from the API
+  const fetchOtherLocsWeather = async () => {
+    
+
+    setOtherError("")
+    const lastLocation = locations[locations.length - 1].city
+    const lastLocationId = locations[locations.length - 1].id
+    const otherForecastData = await getForecast(lastLocation)
+    
+
+    if (otherForecastData) {
+      setOtherForecast(prevData => [...prevData, {
+        id: lastLocationId,
+        temp: Math.floor(otherForecastData.current.temp_c),
+        maxTemp: Math.floor(otherForecastData.forecast.forecastday[0].day.maxtemp_c),
+        minTemp: Math.floor(otherForecastData.forecast.forecastday[0].day.mintemp_c),
+        city: otherForecastData.location.name,
+        country: otherForecastData.location.country,
+        localTime: otherForecastData.location.localtime,
+      }])
+    } else {
+      setOtherError("Could not fetch weather.")
+    }
+  }
 
   //Handling favorite location function
   const toggleFavorite = (id) => {
     const location = locations.find(loc => loc.id === id)
     
     if (location) {
-      setFavlocation(location.city)
+      setFavlocation({
+        id: location.id,
+        city: location.city
+      })
+      handleDelete(id)
     }
   }
 
@@ -161,15 +196,57 @@ const App = () => {
   const closeInfoModal = () => {
     setInfoModal(false)
   }
-  
+
+  //Creating an eventListener for esc button to close the modals
+  const handleKeyDown = (e) => {
+    if (e.key === "Escape") {
+      closeInfoModal()
+      closeManageLocationsModal()
+    }
+  }
+
   useEffect(() => {
-    if (favLocation) {
-      fetchWeather()
+    if (infoModal || manageLocsModal) {
+      window.addEventListener("keydown", handleKeyDown)
+    }
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [infoModal, manageLocsModal])
+
+  //Detecting if user clicked outside the SideBar
+  useEffect(() => { 
+    const handleClickOutside = (e) => {
+      if (SideBarRef.current && !SideBarRef.current.contains(e.target)) {
+        setIsNavOpen(false)
+      }
+    }
+    if (isNavOpen) {
+      document.addEventListener("mousedown", handleClickOutside)
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [isNavOpen])
+
+  //Calling fetch functions
+  useEffect(() => {
+    if (favLocation.city) {
+      fetchFavLocWeather()
     }
   }, [favLocation])
 
+  useEffect(() => {
+      if (locations.length > 0) {
+          fetchOtherLocsWeather()
+        }
+  }, [locations])
+
+
   return (
-    <main className="min-h-screen">
+    <main className={`min-h-screen transition-all duration-500 ${isDay ? "bg-day-sky" : "bg-night-sky"}`}>
       <div className="relative min-h-screen max-w-3xl mx-auto overflow-hidden">
         <motion.div
             animate={{x: isNavOpen ? (smallScreen ? "18rem" : "24rem") : "0rem"}}
@@ -183,9 +260,9 @@ const App = () => {
             </button>
 
             {error && 
-            <p className="bg-white/10 backdrop-blur-md rounded-lg p-5 shadow-lg border border-white/20 h-16 w-96 text-center text-white mx-auto mt-20">
-              {error}
-            </p>}
+              <p className="bg-white/10 backdrop-blur-md rounded-lg p-5 shadow-lg border border-white/20 h-16 w-96 text-center text-white mx-auto mt-20">
+                {error}
+              </p>}
 
             {forecast && (
               <div id="weather-info" className="flex flex-col items-center text-white w-full py-14 sm:py-10 px-5 sm:px-10">
@@ -250,7 +327,7 @@ const App = () => {
                   <p className="flex gap-2"><Radiation/>AQI</p>
                   <p className="text-nowrap">{aqi}</p>
                 </div>
-                {weatherAlerts.alerts.alert > 0 && (
+                {weatherAlerts.length > 0 && (
                   <div id="alerts" className="flex justify-between items-center bg-white/10 backdrop-blur-md rounded-lg p-5 mt-10 shadow-lg border border-white/20 w-11/12 text-center">
                     <p className="text-center text-lg">
                       {weatherAlerts.alerts.alert[0]?.desc}
@@ -262,18 +339,23 @@ const App = () => {
           </motion.div>
 
           <motion.div
+            ref={SideBarRef}
             initial={{x: "-100%"}}
             animate={{x: isNavOpen ? "0%" : "-100%"}}
             transition={{type: "spring", stiffness: 80}}
-            className="absolute top-0 left-0 bg-white/10 backdrop-blur-md rounded-lg p-4 shadow-lg border border-white/20 min-h-screen sm:w-96 w-72 text-center" 
+            className="absolute top-0 left-0 bg-white/10 backdrop-blur-md rounded-lg p-4 shadow-lg border border-white/20 h-full sm:w-96 w-72 text-center"
+
           >
             <SideBar 
                 formSubmit={formSubmit}
                 locations={locations}
                 openManageLocationsModal={openManageLocationsModal}
-                favLocation={favLocation}
+                favLocation={favLocation.city}
                 forecast={forecast}
+                otherForecast={otherForecast}
+                otherError={otherError}
                 timeOfDay={timeOfDay}
+                hour={hour}
                 infoModal={infoModal}
                 openInfoModal={openInfoModal}
                 closeInfoModal={closeInfoModal}
@@ -287,11 +369,17 @@ const App = () => {
             infoModal={infoModal}
             openInfoModal={openInfoModal}
             closeInfoModal={closeInfoModal}
+            toggleFavorite={toggleFavorite}
+            handleDelete={handleDelete}
             forecast={forecast}
-            favLocation={favLocation}
+            otherForecast={otherForecast}
+            favLocation={favLocation.city}
             locations={locations}
             roundedTemp={roundedTemp}
-            roundedFeelTemp={roundedFeelTemp}
+            roundedMaxTemp={roundedMaxTemp}
+            roundedMinTemp={roundedMinTemp}
+            timeOfDay={timeOfDay}
+            hour={hour}
           />}
       </div>
     </main>
