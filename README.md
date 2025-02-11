@@ -46,7 +46,7 @@ I was always a fan of Samsung's Weather UI, so that inspired me to create this p
    ```
 
 ## Demo
-![Weather App Demo](./src/assets/Demo.gif)
+![Weather App Demo](./public/Demo.gif)
 
 
 ## Credits
